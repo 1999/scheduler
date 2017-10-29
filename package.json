@@ -1,6 +1,6 @@
 {
   "name": "@1999/scheduler",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Node.js library for periodical tasks",
   "config": {
     "access": "public"
@@ -12,6 +12,10 @@
     "npm": ">=5",
     "node": ">=8"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "rm -fr dist/ && ./node_modules/.bin/tsc",
     "lint": "tslint  -p . -c tslint.json 'src/**/*.ts'",
