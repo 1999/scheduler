@@ -7,7 +7,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "outDir": "dist",
-    "rootDir": "",
+    "rootDir": "src",
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es2017",

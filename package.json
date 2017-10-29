@@ -1,6 +1,6 @@
 {
   "name": "@1999/scheduler",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Node.js library for periodical tasks",
   "config": {
     "access": "public"
@@ -14,10 +14,10 @@
   },
   "scripts": {
     "build": "rm -fr dist/ && ./node_modules/.bin/tsc",
-    "lint": "tslint  -p . -c tslint.json './**/*.ts'",
+    "lint": "tslint  -p . -c tslint.json 'src/**/*.ts'",
     "prepublishOnly": "npm run build",
-    "test:unit": "mocha --reporter spec --require ts-node/register --slow 10000 --timeout 10000 './**/*-spec.ts'",
-    "test": "npm run lint && npm run test:base"
+    "test:unit": "mocha --reporter spec --require ts-node/register --slow 10000 --timeout 10000 'src/**/*-spec.ts'",
+    "test": "npm run lint && npm run test:unit"
   },
   "repository": {
     "type": "git",
