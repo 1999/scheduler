@@ -12,7 +12,11 @@ Node.js library for periodical tasks written in Typescript.
 
 ## API
 
+The only concept of scheduler is a `Task` which represents a periodically run task. It should be a callback which should return a Promise.
+
 ### Simple tasks
+
+Use `scheduler.addTask(task: Task, period: number)` function to set up task period.
 
 ```typescript
 import {
@@ -21,13 +25,15 @@ import {
 } from '@1999/scheduler';
 
 const task: Task = () => Promise.resolve(2);
-const scheduler = new Scheduler(logger);
+const scheduler = new Scheduler();
 scheduler.addTask(task, 1000);
 
 scheduler.start();
 ```
 
 ### Named tasks
+
+In this case you can pass task groups in scheduler constructor. Then use `scheduler.addTask(task: Task, periodId: string)` function to assign task to task group.
 
 ```typescript
 import {
@@ -38,7 +44,7 @@ import {
 const task1: Task = () => got('https://api.facebook/id/1');
 const task2: Task = () => got('https://api.facebook/id/2');
 
-const scheduler = new Scheduler(logger, { api: 1000 });
+const scheduler = new Scheduler({ api: 1000 });
 scheduler.addTask(task1, 'api');
 scheduler.addTask(task2, 'api');
 
