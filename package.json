@@ -1,0 +1,52 @@
+{
+  "name": "@1999/scheduler",
+  "version": "0.0.1",
+  "description": "Node.js library for periodical tasks",
+  "config": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "jsnext:main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "npm": ">=5",
+    "node": ">=8"
+  },
+  "scripts": {
+    "build": "rm -fr dist/ && ./node_modules/.bin/tsc",
+    "lint": "tslint  -p . -c tslint.json './**/*.ts'",
+    "prepublishOnly": "npm run build",
+    "test:unit": "mocha --reporter spec --require ts-node/register --slow 10000 --timeout 10000 './**/*-spec.ts'",
+    "test": "npm run lint && npm run test:base"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1999/scheduler.git"
+  },
+  "author": "Dmitrii Sorin <info@staypositive.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/1999/scheduler/issues"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "homepage": "https://github.com/1999/scheduler#readme",
+  "dependencies": {
+    "debug": "^3.1.0",
+    "ts-node": "^3.3.0",
+    "typescript": "^2.5.3",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/debug": "0.0.30",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.47",
+    "@types/sinon": "^2.3.7",
+    "@types/uuid": "^3.4.3",
+    "mocha": "^4.0.1",
+    "sinon": "^4.0.2",
+    "tslint": "^5.8.0"
+  }
+}

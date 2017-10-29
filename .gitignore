@@ -1,0 +1,7 @@
+.nyc_output
+.vscode
+.idea
+
+node_modules/
+npm-debug.log
+dist/
