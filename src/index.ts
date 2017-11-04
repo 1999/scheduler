@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as debug from 'debug';
+import { EventEmitter } from 'events';
 import * as uuid from 'uuid';
 
 import {
@@ -15,13 +16,17 @@ const debugLog = debug('@1999/scheduler');
 
 export { Task };
 
+const getMsTime = (hrTime: [number, number]): number => {
+  return hrTime[0] * 1e3 + hrTime[1] / 1e6;
+};
+
 export const sleep = (time: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
 };
 
-export default class Scheduler {
+export default class Scheduler extends EventEmitter {
   private periods: IPeriods;
 
   private history: ITaskHistory[] = [];
@@ -31,6 +36,8 @@ export default class Scheduler {
   private taskRunning = false;
 
   constructor(periods?: IPeriods) {
+    super();
+
     if (periods) {
       Object.keys(periods).forEach((key) => {
         assert(periods[key] > 0, `Period "{${key}}" is too short`);
@@ -190,6 +197,8 @@ export default class Scheduler {
   }
 
   private async runTask(task: Task): Promise<void> {
+    const start = process.hrtime();
+
     assert(this.tasks.has(task), 'Trying to execute unknown task');
     assert(!this.taskRunning, 'Task is already running');
     debugLog('Run task');
@@ -199,8 +208,21 @@ export default class Scheduler {
 
     try {
       await task();
+      const finish = process.hrtime(start);
+
+      this.emit('taskCompleted', {
+        execTime: getMsTime(finish),
+        name: task.name,
+      });
     } catch (err) {
       debugLog(`Task run error: ${err.message}`);
+      const finish = process.hrtime(start);
+
+      this.emit('taskFailed', {
+        err,
+        execTime: getMsTime(finish),
+        name: task.name,
+      });
     }
 
     this.taskRunning = false;

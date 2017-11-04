@@ -50,3 +50,10 @@ scheduler.addTask(task2, 'api');
 
 scheduler.start();
 ```
+
+### Events
+
+Scheduler instance extends node.js [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter). You can use it to subscribe to events happening inside Scheduler instance:
+
+ * `taskCompleted` - emits when task is successfully finished. Also emits an object `{ name: string, execTime: number }` where runTime is the task execution time in milliseconds.
+ * `taskFailed` - emits when task execution fails. Also emits an object `{ err: Error, execTime: number, name: string }`

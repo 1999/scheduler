@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { EventEmitter } from 'events';
 import * as sinon from 'sinon';
 
 import {
@@ -35,6 +36,8 @@ describe('Scheduler', () => {
   it('should expose expected API', () => {
     const scheduler = new Scheduler();
 
+    assert(scheduler instanceof EventEmitter);
+
     assert.strictEqual(typeof scheduler.addTask, 'function');
     assert.strictEqual(scheduler.addTask.length, 2);
 
@@ -45,7 +48,60 @@ describe('Scheduler', () => {
     assert.strictEqual(scheduler.stop.length, 0);
   });
 
-  describe('tasks', () => {
+  describe('EventEmitter events', () => {
+    it('should emit taskCompleted when task is successfully finished', async () => {
+      const scheduler = new Scheduler();
+      const spyTask = sinon.spy();
+      const spyEvents = sinon.spy();
+      const task = getSpyTask(spyTask, 100, 'foo');
+
+      scheduler.on('taskCompleted', spyEvents);
+
+      scheduler.addTask(task, 200);
+      scheduler.start();
+      await sleep(500); // 400ms + 100ms for mocha internal machinery
+      scheduler.stop();
+
+      assert.strictEqual(spyEvents.callCount, 2);
+
+      const args = spyEvents.getCalls().map((call) => call.args);
+      for (const arg of args) {
+        assert.strictEqual(arg.length, 1, `.emit('taskCompleted') arguments number is wrong: ${arg.length}`);
+
+        const obj = arg[0];
+        assert.strictEqual(obj.name, 'foo', 'Task name is wrong');
+        assert.strictEqual(typeof obj.execTime, 'number', 'Execution time value is wrong');
+      }
+    });
+
+    it('should emit taskFailed when task fails', async () => {
+      const scheduler = new Scheduler();
+      const spyTask = sinon.spy();
+      const spyEvents = sinon.spy();
+      const task = getSpyTask(spyTask, 100, 'foo', true);
+
+      scheduler.on('taskFailed', spyEvents);
+
+      scheduler.addTask(task, 200);
+      scheduler.start();
+      await sleep(500); // 400ms + 100ms for mocha internal machinery
+      scheduler.stop();
+
+      assert.strictEqual(spyEvents.callCount, 2);
+
+      const args = spyEvents.getCalls().map((call) => call.args);
+      for (const arg of args) {
+        assert.strictEqual(arg.length, 1, `.emit('taskFailed') arguments number is wrong: ${arg.length}`);
+
+        const obj = arg[0];
+        assert.strictEqual(obj.name, 'foo', 'Task name is wrong');
+        assert.strictEqual(typeof obj.execTime, 'number', 'Execution time value is wrong');
+        assert(obj.err instanceof Error, 'Error field contains wrong value');
+      }
+    });
+  });
+
+  describe('tasks()', () => {
     context('task(period=100, run_time=200)', () => {
       it('should run expected number of tasks', async () => {
         const scheduler = new Scheduler();
@@ -384,7 +440,7 @@ describe('Scheduler', () => {
     });
   });
 
-  describe('addTask', () => {
+  describe('addTask()', () => {
     it('should throw if period is too short', () => {
       const scheduler = new Scheduler();
       const task = () => sleep(200);
@@ -416,7 +472,7 @@ describe('Scheduler', () => {
     });
   });
 
-  describe('start', () => {
+  describe('start()', () => {
     let scheduler: Scheduler;
 
     afterEach(() => {
@@ -442,7 +498,7 @@ describe('Scheduler', () => {
     });
   });
 
-  describe('stop', () => {
+  describe('stop()', () => {
     it('should throw if scheduler is not running', () => {
       const scheduler = new Scheduler();
       assert.throws(() => scheduler.stop());
