@@ -26,12 +26,24 @@ export const sleep = (time: number) => {
   });
 };
 
+export interface ITaskCompleted {
+  execTime: number;
+  name: string;
+}
+
+export interface ITaskFailed {
+  err: Error;
+  execTime: number;
+  name: string;
+}
+
 export default class Scheduler extends EventEmitter {
   private periods: IPeriods;
 
   private history: ITaskHistory[] = [];
   private tasks = new Map<Task, number | string>();
   private lastExecuted = new Map<Task, number>();
+  private taskNames = new Map<Task, string>();
   private started = false;
   private taskRunning = false;
 
@@ -47,7 +59,7 @@ export default class Scheduler extends EventEmitter {
     }
   }
 
-  addTask(task: Task, period: number | string) {
+  addTask(task: Task, period: number | string, taskName?: string) {
     if (typeof period === 'number') {
       assert(period > 0, 'Period is too short');
     } else {
@@ -56,8 +68,11 @@ export default class Scheduler extends EventEmitter {
     }
 
     if (!this.tasks.has(task)) {
-      debugLog(`Task "${task.name}" was added to scheduler`);
+      const taskFinalName = taskName || task.name;
+      debugLog(`Task "${taskFinalName}" was added to scheduler`);
+
       this.tasks.set(task, period);
+      this.taskNames.set(task, taskFinalName);
     }
   }
 
@@ -80,15 +95,17 @@ export default class Scheduler extends EventEmitter {
 
   private async runLoop(): Promise<void> {
     debugLog('Loop processing started');
+
     const { task, wait } = this.chooseTask();
+    const taskName = this.taskNames.get(task)!;
 
     const taskHistory: ITaskHistory = {
       completed: false,
       started: false,
-      task: task.name,
+      task: taskName,
     };
 
-    debugLog(`Task chosen: "${task.name}", time to wait: ${wait}`);
+    debugLog(`Task chosen: "${taskName}", time to wait: ${wait}`);
     this.history.push(taskHistory);
 
     await sleep(wait);
@@ -181,8 +198,9 @@ export default class Scheduler extends EventEmitter {
 
     for (const taskGroup of taskGroups.values()) {
       const { task, wait: timeToWait } = taskGroup.findBestMatch();
+      const taskName = this.taskNames.get(task)!;
 
-      debugLog(`TTW for ${task.name} is ${timeToWait}`);
+      debugLog(`TTW for ${taskName} is ${timeToWait}`);
 
       if (outputTask! === undefined || timeToWait < smallestTimeToWait!) {
         outputTask = task;
@@ -198,6 +216,7 @@ export default class Scheduler extends EventEmitter {
 
   private async runTask(task: Task): Promise<void> {
     const start = process.hrtime();
+    const taskName = this.taskNames.get(task);
 
     assert(this.tasks.has(task), 'Trying to execute unknown task');
     assert(!this.taskRunning, 'Task is already running');
@@ -212,8 +231,8 @@ export default class Scheduler extends EventEmitter {
 
       this.emit('taskCompleted', {
         execTime: getMsTime(finish),
-        name: task.name,
-      });
+        name: taskName!,
+      } as ITaskCompleted);
     } catch (err) {
       debugLog(`Task run error: ${err.message}`);
       const finish = process.hrtime(start);
@@ -221,8 +240,8 @@ export default class Scheduler extends EventEmitter {
       this.emit('taskFailed', {
         err,
         execTime: getMsTime(finish),
-        name: task.name,
-      });
+        name: taskName!,
+      } as ITaskFailed);
     }
 
     this.taskRunning = false;

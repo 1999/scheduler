@@ -9,7 +9,7 @@ import {
 
 import { Task } from './interfaces';
 
-const getSpyTask = (spy: sinon.SinonSpy, duration: number, taskName?: string, rejected?: boolean): Task => {
+const getSpyTask = (spy: sinon.SinonSpy, duration: number, rejected?: boolean): Task => {
   const output = () => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -24,11 +24,6 @@ const getSpyTask = (spy: sinon.SinonSpy, duration: number, taskName?: string, re
     });
   };
 
-  // set function name for better debugging
-  if (taskName) {
-    Object.defineProperty(output, 'name', { value: taskName });
-  }
-
   return output;
 };
 
@@ -39,7 +34,7 @@ describe('Scheduler', () => {
     assert(scheduler instanceof EventEmitter);
 
     assert.strictEqual(typeof scheduler.addTask, 'function');
-    assert.strictEqual(scheduler.addTask.length, 2);
+    assert.strictEqual(scheduler.addTask.length, 3);
 
     assert.strictEqual(typeof scheduler.start, 'function');
     assert.strictEqual(scheduler.start.length, 0);
@@ -53,11 +48,11 @@ describe('Scheduler', () => {
       const scheduler = new Scheduler();
       const spyTask = sinon.spy();
       const spyEvents = sinon.spy();
-      const task = getSpyTask(spyTask, 100, 'foo');
+      const task = getSpyTask(spyTask, 100);
 
       scheduler.on('taskCompleted', spyEvents);
 
-      scheduler.addTask(task, 200);
+      scheduler.addTask(task, 200, 'foo');
       scheduler.start();
       await sleep(500); // 400ms + 100ms for mocha internal machinery
       scheduler.stop();
@@ -78,11 +73,11 @@ describe('Scheduler', () => {
       const scheduler = new Scheduler();
       const spyTask = sinon.spy();
       const spyEvents = sinon.spy();
-      const task = getSpyTask(spyTask, 100, 'foo', true);
+      const task = getSpyTask(spyTask, 100, true);
 
       scheduler.on('taskFailed', spyEvents);
 
-      scheduler.addTask(task, 200);
+      scheduler.addTask(task, 200, 'foo');
       scheduler.start();
       await sleep(500); // 400ms + 100ms for mocha internal machinery
       scheduler.stop();
@@ -132,9 +127,9 @@ describe('Scheduler', () => {
       it('should run expected number of rejected tasks', async () => {
         const scheduler = new Scheduler();
         const spy = sinon.spy();
-        const task = getSpyTask(spy, 200, 'task', true);
+        const task = getSpyTask(spy, 200, true);
 
-        scheduler.addTask(task, 100);
+        scheduler.addTask(task, 100, 'task');
         scheduler.start();
         await sleep(1100); // 1 second + 100ms for mocha internal machinery
         scheduler.stop();
@@ -145,9 +140,9 @@ describe('Scheduler', () => {
       it('should run expected number of rejected tasks (named periods)', async () => {
         const scheduler = new Scheduler({ foo: 100 });
         const spy = sinon.spy();
-        const task = getSpyTask(spy, 200, 'task', true);
+        const task = getSpyTask(spy, 200, true);
 
-        scheduler.addTask(task, 'foo');
+        scheduler.addTask(task, 'foo', 'task');
         scheduler.start();
         await sleep(1100); // 1 second + 100ms for mocha internal machinery
         scheduler.stop();
@@ -189,12 +184,12 @@ describe('Scheduler', () => {
         const scheduler = new Scheduler();
 
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 200, 'task1');
+        const task1 = getSpyTask(spy1, 200);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 200, 'task2');
+        const task2 = getSpyTask(spy2, 200);
 
-        scheduler.addTask(task1, 100);
-        scheduler.addTask(task2, 100);
+        scheduler.addTask(task1, 100, 'task1');
+        scheduler.addTask(task2, 100, 'task2');
         scheduler.start();
         await sleep(1700); // 1600ms + 100ms for mocha internal machinery
         scheduler.stop();
@@ -214,12 +209,12 @@ describe('Scheduler', () => {
         const scheduler = new Scheduler({ foo: 100, bar: 100 });
 
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 200, 'task1');
+        const task1 = getSpyTask(spy1, 200);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 200, 'task2');
+        const task2 = getSpyTask(spy2, 200);
 
-        scheduler.addTask(task1, 'foo');
-        scheduler.addTask(task2, 'bar');
+        scheduler.addTask(task1, 'foo', 'task1');
+        scheduler.addTask(task2, 'bar', 'task2');
         scheduler.start();
         await sleep(1700); // 1600ms + 100ms for mocha internal machinery
         scheduler.stop();
@@ -240,12 +235,12 @@ describe('Scheduler', () => {
       it('should run expected number of tasks', async () => {
         const scheduler = new Scheduler();
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 100, 'task1');
+        const task1 = getSpyTask(spy1, 100);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 100, 'task2');
+        const task2 = getSpyTask(spy2, 100);
 
-        scheduler.addTask(task1, 200);
-        scheduler.addTask(task2, 200);
+        scheduler.addTask(task1, 200, 'task1');
+        scheduler.addTask(task2, 200, 'task2');
         scheduler.start();
         await sleep(1100); // 1 second + 100ms for mocha internal machinery
         scheduler.stop();
@@ -264,12 +259,12 @@ describe('Scheduler', () => {
       it('should run expected number of tasks (named periods)', async () => {
         const scheduler = new Scheduler({ foo: 200, bar: 200 });
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 100, 'task1');
+        const task1 = getSpyTask(spy1, 100);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 100, 'task2');
+        const task2 = getSpyTask(spy2, 100);
 
-        scheduler.addTask(task1, 'foo');
-        scheduler.addTask(task2, 'bar');
+        scheduler.addTask(task1, 'foo', 'task1');
+        scheduler.addTask(task2, 'bar', 'task2');
         scheduler.start();
         await sleep(1100); // 1 second + 100ms for mocha internal machinery
         scheduler.stop();
@@ -290,12 +285,12 @@ describe('Scheduler', () => {
       it('should run expected number of tasks', async () => {
         const scheduler = new Scheduler();
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 200, 'task1');
+        const task1 = getSpyTask(spy1, 200);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 400, 'task2');
+        const task2 = getSpyTask(spy2, 400);
 
-        scheduler.addTask(task1, 1000);
-        scheduler.addTask(task2, 5000);
+        scheduler.addTask(task1, 1000, 'task1');
+        scheduler.addTask(task2, 5000, 'task2');
         scheduler.start();
         await sleep(5600); // 5 seconds + 400ms + 200ms for mocha internal machinery
         scheduler.stop();
@@ -315,12 +310,12 @@ describe('Scheduler', () => {
       it('should run expected number of tasks (named periods)', async () => {
         const scheduler = new Scheduler({ foo: 1000, bar: 5000 });
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 200, 'task1');
+        const task1 = getSpyTask(spy1, 200);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 400, 'task2');
+        const task2 = getSpyTask(spy2, 400);
 
-        scheduler.addTask(task1, 'foo');
-        scheduler.addTask(task2, 'bar');
+        scheduler.addTask(task1, 'foo', 'task1');
+        scheduler.addTask(task2, 'bar', 'task2');
         scheduler.start();
         await sleep(5600); // 5 seconds + 400ms + 200ms for mocha internal machinery
         scheduler.stop();
@@ -342,12 +337,12 @@ describe('Scheduler', () => {
       it('should run expected number of tasks', async () => {
         const scheduler = new Scheduler();
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 1200, 'task1');
+        const task1 = getSpyTask(spy1, 1200);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 400, 'task2');
+        const task2 = getSpyTask(spy2, 400);
 
-        scheduler.addTask(task1, 1000);
-        scheduler.addTask(task2, 5000);
+        scheduler.addTask(task1, 1000, 'task1');
+        scheduler.addTask(task2, 5000, 'task2');
         scheduler.start();
         await sleep(7000);
         scheduler.stop();
@@ -367,12 +362,12 @@ describe('Scheduler', () => {
       it('should run expected number of tasks (named periods)', async () => {
         const scheduler = new Scheduler({ foo: 1000, bar: 5000 });
         const spy1 = sinon.spy();
-        const task1 = getSpyTask(spy1, 1200, 'task1');
+        const task1 = getSpyTask(spy1, 1200);
         const spy2 = sinon.spy();
-        const task2 = getSpyTask(spy2, 400, 'task2');
+        const task2 = getSpyTask(spy2, 400);
 
-        scheduler.addTask(task1, 'foo');
-        scheduler.addTask(task2, 'bar');
+        scheduler.addTask(task1, 'foo', 'task1');
+        scheduler.addTask(task2, 'bar', 'task2');
         scheduler.start();
         await sleep(7000);
         scheduler.stop();
@@ -393,12 +388,12 @@ describe('Scheduler', () => {
     it('should run expected number of resolved and rejected tasks', async () => {
       const scheduler = new Scheduler();
       const spy1 = sinon.spy();
-      const task1 = getSpyTask(spy1, 1200, 'task1');
+      const task1 = getSpyTask(spy1, 1200);
       const spy2 = sinon.spy();
-      const task2 = getSpyTask(spy2, 400, 'task2', true);
+      const task2 = getSpyTask(spy2, 400, true);
 
-      scheduler.addTask(task1, 1000);
-      scheduler.addTask(task2, 5000);
+      scheduler.addTask(task1, 1000, 'task1');
+      scheduler.addTask(task2, 5000, 'task2');
       scheduler.start();
       await sleep(7000);
       scheduler.stop();
@@ -418,12 +413,12 @@ describe('Scheduler', () => {
     it('should use same period for separate tasks', async () => {
       const scheduler = new Scheduler({ foo: 1000 });
       const spy1 = sinon.spy();
-      const task1 = getSpyTask(spy1, 100, 'task1');
+      const task1 = getSpyTask(spy1, 100);
       const spy2 = sinon.spy();
-      const task2 = getSpyTask(spy2, 100, 'task2');
+      const task2 = getSpyTask(spy2, 100);
 
-      scheduler.addTask(task1, 'foo');
-      scheduler.addTask(task2, 'foo');
+      scheduler.addTask(task1, 'foo', 'task1');
+      scheduler.addTask(task2, 'foo', 'task2');
       scheduler.start();
       await sleep(5100);
       scheduler.stop();
