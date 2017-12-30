@@ -51,6 +51,30 @@ scheduler.addTask(task2, 'api');
 scheduler.start();
 ```
 
+## When period should depend on task execution
+
+Sometimes it's not enough to have execution periodicity for tasks. For instance when you have an API which allows you to make requests once per N seconds: in this case it can be safer to send next request only N seconds after you get the response from the previous request. For this purpose you can use `Marker` callback which is the only argument for `Task`:
+
+```typescript
+import {
+  default as Scheduler,
+  Marker,
+  Task,
+} from '@1999/scheduler';
+
+const task: Task = (marker: Marker) => {
+  return got('https://api.facebook/id/1').then(() => {
+    // you can run marker function anywhere inside your task
+    // and the period pause will be started from this moment
+    marker();
+  });
+};
+
+const scheduler = new Scheduler();
+scheduler.addTask(task);
+scheduler.start();
+```
+
 ### Events
 
 Scheduler instance extends node.js [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter). You can use it to subscribe to events happening inside Scheduler instance:

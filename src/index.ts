@@ -7,6 +7,7 @@ import {
   IPeriods,
   ITaskAndWaitTime,
   ITaskHistory,
+  Marker,
   Task,
 } from './interfaces';
 
@@ -222,11 +223,16 @@ export default class Scheduler extends EventEmitter {
     assert(!this.taskRunning, 'Task is already running');
     debugLog('Run task');
 
+    const marker: Marker = () => {
+      this.lastExecuted.set(task, Date.now());
+    };
+
     this.taskRunning = true;
-    this.lastExecuted.set(task, Date.now());
+    marker(); // set lastExecuted for this task to start execution time by default
 
     try {
-      await task();
+      await task(marker);
+
       const finish = process.hrtime(start);
 
       this.emit('taskCompleted', {

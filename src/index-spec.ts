@@ -10,7 +10,7 @@ import {
 import { Task } from './interfaces';
 
 const getSpyTask = (spy: sinon.SinonSpy, duration: number, rejected?: boolean): Task => {
-  const output = () => {
+  return () => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         spy();
@@ -23,8 +23,6 @@ const getSpyTask = (spy: sinon.SinonSpy, duration: number, rejected?: boolean): 
       }, duration);
     });
   };
-
-  return output;
 };
 
 describe('Scheduler', () => {
@@ -432,6 +430,28 @@ describe('Scheduler', () => {
 
       assert.strictEqual(spy1.callCount, 3);
       assert.strictEqual(spy2.callCount, 2);
+    });
+
+    it('should use user-provided timeouts', async () => {
+      const scheduler = new Scheduler();
+      const spy = sinon.spy();
+
+      const task: Task = (marker) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            spy();
+            marker();
+            resolve();
+          }, 100);
+        });
+      };
+
+      scheduler.addTask(task, 200);
+      scheduler.start();
+      await sleep(1200); // 1.1 seconds + 100ms for mocha internal machinery
+      scheduler.stop();
+
+      assert.strictEqual(spy.callCount, 4);
     });
   });
 

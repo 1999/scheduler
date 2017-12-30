@@ -1,4 +1,6 @@
-export type Task = () => Promise<any>;
+export type Marker = () => void;
+
+export type Task = (marker: Marker) => Promise<any>;
 
 export interface ITaskAndWaitTime {
   task: Task;
