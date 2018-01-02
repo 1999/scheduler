@@ -195,16 +195,23 @@ export default class Scheduler extends EventEmitter {
     }
 
     let outputTask: Task;
+    let smallestPeriod: number;
     let smallestTimeToWait: number;
 
     for (const taskGroup of taskGroups.values()) {
-      const { task, wait: timeToWait } = taskGroup.findBestMatch();
+      const { period, task, wait: timeToWait } = taskGroup.findBestMatch();
       const taskName = this.taskNames.get(task)!;
 
       debugLog(`TTW for ${taskName} is ${timeToWait}`);
 
-      if (outputTask! === undefined || timeToWait < smallestTimeToWait!) {
+      if (outputTask! === undefined || timeToWait <= smallestTimeToWait!) {
+        // if TTW times are equal compare periods
+        if (timeToWait === smallestTimeToWait && period <= smallestPeriod!) {
+          continue;
+        }
+
         outputTask = task;
+        smallestPeriod = period;
         smallestTimeToWait = timeToWait;
       }
     }

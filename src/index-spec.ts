@@ -453,6 +453,30 @@ describe('Scheduler', () => {
 
       assert.strictEqual(spy.callCount, 4);
     });
+
+    it('should run rarest tasks first', async () => {
+      const scheduler = new Scheduler({ foo: 1000 });
+      const spy = sinon.spy();
+
+      scheduler.addTask(getSpyTask(spy, 0), 60 * 60 * 1000, '1:diff');
+      scheduler.addTask(getSpyTask(spy, 0), 8 * 60 * 60 * 1000, '1:snapshot');
+      scheduler.addTask(getSpyTask(spy, 0), 60 * 60 * 1000, '2:diff');
+      scheduler.addTask(getSpyTask(spy, 0), 8 * 60 * 60 * 1000, '2:snapshot');
+      scheduler.addTask(getSpyTask(spy, 0), 10 * 60 * 1000, '3:diff');
+      scheduler.addTask(getSpyTask(spy, 0), 60 * 60 * 1000, '3:snapshot');
+      scheduler.addTask(getSpyTask(spy, 0), 1000, '4:diff');
+      scheduler.addTask(getSpyTask(spy, 0), 60 * 1000, '4:snapshot');
+
+      scheduler.start();
+      await sleep(200);
+      scheduler.stop();
+
+      assert.deepEqual(
+        (scheduler as any).history.slice(0, 8)
+          .map((taskHistoryItem: any) => taskHistoryItem.task),
+        ['1:snapshot', '2:snapshot', '1:diff', '2:diff', '3:snapshot', '3:diff', '4:snapshot', '4:diff'],
+      );
+    });
   });
 
   describe('addTask()', () => {

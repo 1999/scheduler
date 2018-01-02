@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import {
-  ITaskAndWaitTime,
+  ITaskMeta,
   Task,
 } from './interfaces';
 
@@ -24,7 +24,7 @@ export default class TaskGroup {
     this.groupTasks.push(task);
   }
 
-  findBestMatch(): ITaskAndWaitTime {
+  findBestMatch(): ITaskMeta {
     assert(this.groupTasks.length, 'Task group is empty');
 
     let lastExecuted: number;
@@ -60,6 +60,7 @@ export default class TaskGroup {
     }
 
     return {
+      period: this.period,
       task: outputTask,
       wait: timeToWait,
     };
