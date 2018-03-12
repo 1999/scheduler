@@ -6,16 +6,13 @@ import {
 
 export default class TaskGroup {
   private groupTasks: Task[] = [];
-  private tasks: Map<Task, number | string>;
   private lastExecuted: Map<Task, number>;
   private period: number;
 
   constructor(
-    tasks: Map<Task, number | string>,
     lastExecuted: Map<Task, number>,
     period: number,
   ) {
-    this.tasks = tasks;
     this.lastExecuted = lastExecuted;
     this.period = period;
   }
@@ -34,15 +31,15 @@ export default class TaskGroup {
       const lastExecutedTime = this.lastExecuted.get(task);
 
       if (lastExecutedTime) {
-        if (lastExecuted! === undefined || lastExecuted < lastExecutedTime) {
+        if (lastExecuted! === undefined || lastExecuted! < lastExecutedTime) {
           lastExecuted = lastExecutedTime;
         }
       }
     }
 
     const now = Date.now();
-    const timeToWait = lastExecuted
-      ? lastExecuted + this.period - now
+    const timeToWait = lastExecuted!
+      ? lastExecuted! + this.period - now
       : Number.NEGATIVE_INFINITY; // it's just always less than 0
 
     // find best matching task: it should be
@@ -61,7 +58,7 @@ export default class TaskGroup {
 
     return {
       period: this.period,
-      task: outputTask,
+      task: outputTask!,
       wait: timeToWait,
     };
   }

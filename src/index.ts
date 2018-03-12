@@ -186,7 +186,7 @@ export default class Scheduler extends EventEmitter {
       if (!taskGroups.has(taskId)) {
         taskGroups.set(
           taskId,
-          new TaskGroup(this.tasks, this.lastExecuted, taskGroupPeriod),
+          new TaskGroup(this.lastExecuted, taskGroupPeriod),
         );
       }
 
@@ -206,7 +206,7 @@ export default class Scheduler extends EventEmitter {
 
       if (outputTask! === undefined || timeToWait <= smallestTimeToWait!) {
         // if TTW times are equal compare periods
-        if (timeToWait === smallestTimeToWait && period <= smallestPeriod!) {
+        if (timeToWait === smallestTimeToWait! && period <= smallestPeriod!) {
           continue;
         }
 
@@ -217,8 +217,8 @@ export default class Scheduler extends EventEmitter {
     }
 
     return {
-      task: outputTask,
-      wait: smallestTimeToWait,
+      task: outputTask!,
+      wait: smallestTimeToWait!,
     };
   }
 
