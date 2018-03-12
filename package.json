@@ -1,6 +1,6 @@
 {
   "name": "@1999/scheduler",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Node.js library for periodical tasks",
   "config": {
     "access": "public"
