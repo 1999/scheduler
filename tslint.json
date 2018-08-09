@@ -3,7 +3,6 @@
   "rules": {
     "member-access": [true, "no-public"],
     "no-require-imports": false,
-    "no-unused-variable": [true, "check-parameters"],
     "no-var-requires": false,
     "object-literal-key-quotes": false,
     "quotemark": [true, "single"]
