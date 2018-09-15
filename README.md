@@ -1,5 +1,7 @@
 # Scheduler
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/1999/scheduler.svg)](https://greenkeeper.io/)
+
 ![Build Status](https://img.shields.io/travis/1999/scheduler/master.svg)
 ![Dependency Status](http://img.shields.io/david/1999/scheduler/master.svg)
 ![DevDependency Status](http://img.shields.io/david/dev/1999/scheduler/master.svg)
