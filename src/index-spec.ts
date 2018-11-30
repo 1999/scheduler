@@ -554,8 +554,11 @@ describe('sleep', () => {
   it('should resolve after [timeout]ms', async () => {
     const start = Date.now();
     await sleep(300);
-    const finish = Date.now();
+    const diff = Date.now() - start;
 
-    assert(finish - start >= 300);
+    // tslint:disable-next-line:no-console
+    console.log({ diff });
+
+    assert(diff >= 300);
   });
 });
