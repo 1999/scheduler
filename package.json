@@ -6,7 +6,7 @@
     "access": "public"
   },
   "main": "dist/index.js",
-  "jsnext:main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
     "npm": ">=5",
@@ -17,7 +17,7 @@
     "src"
   ],
   "scripts": {
-    "build": "rm -fr dist/ && ./node_modules/.bin/tsc",
+    "build": "rm -fr dist/ && tsc",
     "lint": "tslint  -p . -c tslint.json 'src/**/*.ts'",
     "prepublishOnly": "npm run build",
     "test:unit": "mocha --reporter spec --require ts-node/register --slow 10000 --timeout 10000 'src/**/*-spec.ts'",
@@ -34,19 +34,19 @@
   },
   "homepage": "https://github.com/1999/scheduler",
   "dependencies": {
-    "debug": "^4.0.1",
+    "debug": "^4.1.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/debug": "^0.0.31",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.8",
-    "@types/sinon": "^5.0.5",
+    "@types/node": "^10.12.12",
+    "@types/sinon": "^5.0.7",
     "@types/uuid": "^3.4.4",
     "mocha": "^5.2.0",
-    "sinon": "^7.1.0",
+    "sinon": "^7.1.1",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "typescript": "^3.1.4"
+    "typescript": "^3.2.1"
   }
 }
